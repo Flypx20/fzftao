@@ -77,7 +77,7 @@
 			})
 			.on('click','.control-right',function(){
 				//划动时向左划,方向是1
-				self.tab(self._getCorrectIndex(self.now+1,1));
+				self.tab(self._getCorrectIndex(self.now+1),1);
 			})
 			.on('click','.control-left',function(){
 				//划动时向右划,方向是-1
@@ -125,7 +125,7 @@
 			
 			setTimeout(function(){
 				//让当前的的划出
-				this.$carouselItems.eq(this.now).move('x',-1 * direction * this.itemWidth)
+				this.$carouselItems.eq(this.now).move('x',-1 * direction * this.itemWidth);
 				//让指定的划入
 				this.$carouselItems.eq(index).addClass(this.transitionClass).move('x',0);
 				this.now = index;
@@ -139,7 +139,7 @@
 			this.timer = null;
 			this.timer = setInterval(function(){
 				self.tab(self._getCorrectIndex(self.now+1),-1);
-			},this.options.interval)
+			},this.options.interval);
 		},
 		pause(){
 			clearInterval(this.timer);
@@ -149,7 +149,7 @@
 			if(index < 0) return (this.itemNum - 1);
 			return index;
 		}
-	}
+	};
 
 	Carousel.DEFAULTS = {
 		css3:false,
@@ -157,7 +157,7 @@
 		mode:'fade',
 		activeIndex:1,
 		interval:0
-	}
+	};
 
 	$.fn.extend({
 		carousel:function(options){
@@ -165,7 +165,7 @@
 				var $this = $(this);
 				var carousel = $this.data('carousel');
 				if(!carousel){//单例模式
-					options  = $.extend(Carousel.DEFAULTS,options);
+					options  = $.extend({},Carousel.DEFAULTS,options);
 					carousel = new Carousel($(this),options);
 					$this.data('carousel',carousel);
 				}
@@ -174,6 +174,6 @@
 				}
 			});
 		}
-	})
+	});
 
 })(jQuery);

@@ -26,11 +26,11 @@
 
 		image.onload = function(){
 			if(typeof success == 'function') success(url);
-		}
+		};
 
 		image.onerror = function(){
 			if(typeof error == 'function') error(url);
-		}
+		};
 
 		image.src = url;		
 	}
@@ -39,7 +39,7 @@
 	var $menu = $('.nav-site .dropdown');
 	
 	$menu.on('dropdown-show',function(ev){
-		loadHtmlOnce($(this),buildMenuItem)
+		loadHtmlOnce($(this),buildMenuItem);
 	});
 	//构建菜单并加重
 	function buildMenuItem($elem,data){
@@ -98,7 +98,7 @@
 		var html = '';
 		for(var i = 0;i<data.result.length;i++){
 			if(i>=maxNum) break;
-			html += '<li class="search-item">'+data.result[i][0]+'</li>'
+			html += '<li class="search-item">'+data.result[i][0]+'</li>';
 		}
 		return html;
 	}
@@ -117,7 +117,7 @@
 		for(var i = 0;i<data.length;i++){
 			html += '<dl class="category-details clearfix"><dt class="category-details-title fl"><a href="#" class="category-details-title-link">'+data[i].title+'</a></dt><dd class="category-details-item fl">';
 			for(var j = 0;j<data[i].items.length;j++){
-				html += '<a href="#" class="link">'+data[i].items[j]+'</a>'
+				html += '<a href="#" class="link">'+data[i].items[j]+'</a>';
 			}
 			html += '</dd></dl>';
 		}
@@ -137,49 +137,58 @@
 	/*分类导航结束*/
 
 	/*中心轮播图开始*/
-	var $focusCarousel = $('.focus .carousel-container');
-	/*
-	$focusCarousel.on('carousel-show carousel-shown carousel-hide carousel-hidden',function(ev,index,elem){
-		console.log(index,ev.type);
-	})
-	*/
-	$focusCarousel.item = {};
-	$focusCarousel.totalItemNum =  $focusCarousel.find('img').length;
-	$focusCarousel.loadedItemNum = 0;
 	
-	$focusCarousel.on('carousel-show',$focusCarousel.loadFn = function(ev,index,elem){
-		console.log('carousel-show loading...');
-		if($focusCarousel.item[index] != 'loaded'){
-			$focusCarousel.trigger('carousel-loadItem',[index,elem])
-		}
-	});
-
-	$focusCarousel.on('carousel-loadItem',function(ev,index,elem){
-		console.log(index,'loading...');
-		var $img = $(elem).find('img');
-		var imgUrl = $img.data('src');
-		loadImage(imgUrl,function(url){
-			$img.attr('src',url);
-		},function(url){
-			$img.attr('src','images/focus-carousel/placeholder.png');
-		});
-		$focusCarousel.item[index] = 'loaded';
-		$focusCarousel.loadedItemNum++;
-		if($focusCarousel.loadedItemNum == $focusCarousel.totalItemNum){
-			$focusCarousel.trigger('carousel-loadedItems');
-		}
-	});
-	
-	$focusCarousel.on('carousel-loadedItems',function(){
-		$focusCarousel.off('carousel-show',$focusCarousel.loadFn);
-	});
 
 	/*调用轮播图插件*/
-	$focusCarousel.carousel({
+
+	/*中心轮播图结束*/
+	/*今日热销轮播图开始*/
+	var $focusCarousel = $('.focus .carousel-container');
+	var $todaysCarousel = $('.todays .carousel-container');
+function carousel($elem){
+	
+
+	$elem.item = {};
+	$elem.totalItemNum =  $elem.find('img').length;
+	$elem.loadedItemNum = 0;
+	
+	$elem.on('carousel-show',$elem.loadFn = function(ev,index,elem){
+		if($elem.item[index] != 'loaded'){
+			$elem.trigger('carousel-loadItem',[index,elem]);
+		}
+	});
+
+	$elem.on('carousel-loadItem',function(ev,index,elem){
+		var $img = $(elem).find('img');
+		$img.each(function() {
+		var $this = $(this);
+		var imgUrl = $this.data('src');
+		loadImage(imgUrl,function(url){
+			$this.attr('src',url);
+		},function(url){
+			$this.attr('src','images/focus-carousel/placeholder.png');
+		});
+			$elem.item[index] = 'loaded';
+			$elem.loadedItemNum++;
+			if($elem.loadedItemNum == $elem.totalItemNum){
+				$elem.trigger('carousel-loadedItems');
+			}
+		});
+		});
+		
+		$elem.on('carousel-loadedItems',function(){
+			$elem.off('carousel-show',$elem.loadFn);
+		});
+
+	/*调用轮播图插件*/
+	$elem.carousel({
 		activeIndex:0,
 		mode:'slide',
 		interval:0
 	});
+}
+carousel($focusCarousel);
+carousel($todaysCarousel);
+	/*今日热销轮播图结束*/
 
-	/*中心轮播图结束*/
 })(jQuery);

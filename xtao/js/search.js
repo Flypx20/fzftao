@@ -56,7 +56,7 @@
 					clearTimeout(this.timer);
 					this.timer = setTimeout(function(){
 						this.getData();
-					}.bind(this),this.options.getDataInterval)
+					}.bind(this),this.options.getDataInterval);
 				}else{
 					this.getData();
 				}
@@ -95,7 +95,7 @@
 				jsonp:'callback'
 			})
 			.done(function(data){
-				cache.addData(inputVal,data)
+				cache.addData(inputVal,data);
 				this.$elem.trigger('getData',[data]);
 			}.bind(this))
 			.fail(function(err){
@@ -128,7 +128,7 @@
 				return str.replace(/<[^<|>]+>/g,'');
 			}			
 		}
-	}
+	};
 	Search.DEFAULTS = {
 		autocomplete:false,
 		css3:false,
@@ -136,7 +136,7 @@
 		mode:'slideUpDown',
 		getDataInterval:200,
 		url:'https://suggest.taobao.com/sug?code=utf-8&_ksTS=1528889766600_556&k=1&area=c2c&bucketid=17&q='
-	}
+	};
 
 	$.fn.extend({
 		search:function(options,val){
@@ -144,7 +144,7 @@
 				var $this = $(this);
 				var search = $this.data('search');
 				if(!search){//单例模式
-					options  = $.extend(Search.DEFAULTS,options);
+					options  = $.extend({},Search.DEFAULTS,options);
 					search = new Search($(this),options);
 					$this.data('search',search);
 				}

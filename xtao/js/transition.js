@@ -11,11 +11,11 @@
 		MozTransition: 'transitionend',
 		WebkitTransition: 'webkitTransitionEnd',
 		OTransition: 'oTransitionEnd'
-	}
+	};
 	var transition = {
 		end:'',
 		isSupport:false
-	}
+	};
 	for(key in transitionEventName){
 		if(document.body.style[key] !== undefined){
 			transition.end = transitionEventName[key];
