@@ -2,7 +2,7 @@
 * @Author: TomChen
 * @Date:   2018-06-11 20:07:55
 * @Last Modified by:   TomChen
-* @Last Modified time: 2018-07-06 14:46:18
+* @Last Modified time: 2018-07-09 09:08:41
 */
 ;(function($) {
 	//共通的初始化方法
@@ -17,7 +17,6 @@
 	function show($elem,callBack){
 		if($elem.data('status')=='shown') return;
 		if($elem.data('status')=='show') return;
-		
 		$elem.data('status','show').trigger('show');
 
 		callBack();	
@@ -37,7 +36,7 @@
 			show($elem,function(){
 				$elem.show();
 				$elem.trigger('shown').data('status','shown');
-			});
+			})
 			
 		},
 		hide:function($elem){
@@ -122,7 +121,7 @@
 		init($elem,function(){
 			$elem.addClass(className);
 		});			
-	};
+	}
 	css3._show = function($elem,className){
 		show($elem,function(){
 			$elem.show();//dispaly=block
@@ -137,7 +136,7 @@
 				$elem.removeClass(className);
 			},20);					
 		});		
-	};
+	}
 	css3._hide = function($elem,className){
 		hide($elem,function(){
 			//过渡完成后触发
@@ -152,7 +151,7 @@
 			//触发了过渡	
 			$elem.addClass(className);	
 		});			
-	};
+	}
 	//js相关显示和隐藏
 	var js = {
 		//淡入淡出的显示隐藏
@@ -243,25 +242,25 @@
 					});
 			}
 		}				
-	};
+	}
 	js._init = function($elem){
 		$elem.removeClass('transition');//避免和css3的过渡发生冲突
 		init($elem);
-	};
+	}
 	js._show = function($elem,mode){
 		show($elem,function(){
 			$elem.stop()[mode](function(){
 				$elem.trigger('shown').data('status','shown');
-			});
+			})
 		});		
-	};
+	}
 	js._hide = function($elem,mode){
 		hide($elem,function(){
 			$elem.stop()[mode](function(){
 				$elem.trigger('hidden').data('status','hidden');
-			});
+			})
 		});		
-	};
+	}
 	js._customInit = function($elem,options){
 		$elem.removeClass('transition');
 
@@ -275,7 +274,7 @@
 			//把水平的宽度值设置为0
 			$elem.css(options);
 		});		
-	};
+	}
 	js._customShow = function($elem){
 		$elem.show();//display:block
 		//获取原始值
@@ -285,16 +284,16 @@
 			.animate($elem.data('styles'),function(){
 				$elem.trigger('shown').data('status','shown');
 			});					
-		});		
-	};
+		})		
+	}
 	js._customHide = function($elem,options){
 		hide($elem,function(){
 			$elem.stop().animate(options,function(){
 				$elem.hide();
 				$elem.trigger('hidden').data('status','hidden');
 			});						
-		});		
-	};
+		})		
+	}
 
 	//根据参数决定使用什么方式的显示和隐藏
 	function showHide($elem,options){
@@ -322,7 +321,7 @@
 		return {
 			show:showHideFn.show,
 			hide:showHideFn.hide
-		};
+		}
 	}
 
 	$.fn.extend({
@@ -331,7 +330,7 @@
 				css3:false,
 				js:false,
 				mode:'fade'
-			};
+			}
 			this.each(function(){
 				var $elem = $(this);
 				var mode = $elem.data('mode');//undefined/obj

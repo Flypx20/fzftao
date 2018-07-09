@@ -2,7 +2,7 @@
 * @Author: TomChen
 * @Date:   2018-07-05 10:36:38
 * @Last Modified by:   TomChen
-* @Last Modified time: 2018-07-06 15:56:13
+* @Last Modified time: 2018-07-07 10:32:24
 */
 ;(function($){
 
@@ -110,7 +110,7 @@
 			//index代表将要划入的索引
 			//this.now代表当前的
 			//direction 左划,方向是1,右划,方向是-1
-			
+
 			//确定方向
 			if(!direction){
 				if(index > this.now){
@@ -125,7 +125,7 @@
 			
 			setTimeout(function(){
 				//让当前的的划出
-				this.$carouselItems.eq(this.now).move('x',-1 * direction * this.itemWidth);
+				this.$carouselItems.eq(this.now).move('x',-1 * direction * this.itemWidth)
 				//让指定的划入
 				this.$carouselItems.eq(index).addClass(this.transitionClass).move('x',0);
 				this.now = index;
@@ -138,8 +138,8 @@
 			var self = this;
 			this.timer = null;
 			this.timer = setInterval(function(){
-				self.tab(self._getCorrectIndex(self.now+1),-1);
-			},this.options.interval);
+				self.tab(self._getCorrectIndex(self.now+1),1);
+			},this.options.interval)
 		},
 		pause(){
 			clearInterval(this.timer);
@@ -149,7 +149,7 @@
 			if(index < 0) return (this.itemNum - 1);
 			return index;
 		}
-	};
+	}
 
 	Carousel.DEFAULTS = {
 		css3:false,
@@ -157,7 +157,7 @@
 		mode:'fade',
 		activeIndex:1,
 		interval:0
-	};
+	}
 
 	$.fn.extend({
 		carousel:function(options){
@@ -174,6 +174,6 @@
 				}
 			});
 		}
-	});
+	})
 
 })(jQuery);
