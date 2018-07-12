@@ -1,3 +1,9 @@
+/*
+* @Author: TomChen
+* @Date:   2018-06-08 20:17:35
+* @Last Modified by:   TomChen
+* @Last Modified time: 2018-07-09 15:32:38
+*/
 ;(function($){
 
 	function loadHtmlOnce($elem,callBack){
@@ -22,79 +28,29 @@
 			$.getJSON(url,function(resData){
 				$elem.data(url,resData);
 				callBack(resData);
-			});
+			})
 		}else{
 			callBack(data);
 		}
 	}
-	//加载图片
 	function loadImage(url,success,error){
 		var image = new Image();
 
 		image.onload = function(){
 			if(typeof success == 'function') success(url);
-		};
+		}
 
 		image.onerror = function(){
 			if(typeof error == 'function') error(url);
-		};
+		}
 
 		image.src = url;		
 	}
-	//加载多张图片
-	function loadImages($imgs,success,error){
-		$imgs.each(function(){
-			var $img = $(this);
-			var imgUrl = $img.data('src');
-			loadImage(imgUrl,function(imgUrl){
-				// $img.attr('src',url); 
-				success($img,imgUrl);
-			},function(imgUrl){
-				error($img,imgUrl);
-			});
-		});
-	}	
-	//懒加载
-	/*
-	懒加载实例
-	options = {
-		totalItemNum:5
-		$elem:$elem,
-		eventName:'tab-show',
-		eventPrefix:'tab'
-	}
-	*/
-	function lazyLoad(options){
-		var item = {},
-		    totalItemNum =  options.totalItemNum,
-			loadedItemNum = 0,
-			loadFn = null,
-			$elem = options.$elem,
-			eventName = options.eventName,
-			eventPrefix = options.eventPrefix;
-		
-		$elem.on(eventName,loadFn = function(ev,index,elem){//确定加载时机
-			if(item[index] != 'loaded'){//具体加载
-				$elem.trigger(eventPrefix+'-loadItem',[index,elem,function(){
-					item[index] = 'loaded';
-					loadedItemNum++;
-					if(loadedItemNum == totalItemNum){//整个加载结束
-						$elem.trigger(eventPrefix+'-loadedItems');
-					}
-				}]);
-			}
-		});
-
-		$elem.on(eventPrefix+'-loadedItems',function(){
-			$elem.off(eventName,loadFn);
-		});
-	}	
-
 	/*顶部下拉菜单开始*/
 	var $menu = $('.nav-site .dropdown');
 	
 	$menu.on('dropdown-show',function(ev){
-		loadHtmlOnce($(this),buildMenuItem);
+		loadHtmlOnce($(this),buildMenuItem)
 	});
 	//构建菜单并加重
 	function buildMenuItem($elem,data){
@@ -153,7 +109,7 @@
 		var html = '';
 		for(var i = 0;i<data.result.length;i++){
 			if(i>=maxNum) break;
-			html += '<li class="search-item">'+data.result[i][0]+'</li>';
+			html += '<li class="search-item">'+data.result[i][0]+'</li>'
 		}
 		return html;
 	}
@@ -172,7 +128,7 @@
 		for(var i = 0;i<data.length;i++){
 			html += '<dl class="category-details clearfix"><dt class="category-details-title fl"><a href="#" class="category-details-title-link">'+data[i].title+'</a></dt><dd class="category-details-item fl">';
 			for(var j = 0;j<data[i].items.length;j++){
-				html += '<a href="#" class="link">'+data[i].items[j]+'</a>';
+				html += '<a href="#" class="link">'+data[i].items[j]+'</a>'
 			}
 			html += '</dd></dl>';
 		}
@@ -191,24 +147,52 @@
 
 	/*分类导航结束*/
 
+	//轮播图按需加载函数
+	function carouselImgLazyLoad($elem){
+
+		var item = {},
+		    totalItemNum =  $elem.find('.carousel-img').length,
+			loadedItemNum = 0,
+			loadFn = null;
+		
+		$elem.on('carousel-show',loadFn = function(ev,index,elem){
+			console.log('carousel-show loading...');
+			if(item[index] != 'loaded'){
+				$elem.trigger('carousel-loadItem',[index,elem])
+			}
+		});
+
+		$elem.on('carousel-loadItem',function(ev,index,elem){
+			console.log(index,'loading...');
+			var $imgs = $(elem).find('.carousel-img');
+			$imgs.each(function(){
+				var $img = $(this);
+				var imgUrl = $img.data('src');
+				loadImage(imgUrl,function(url){
+					$img.attr('src',url);
+				},function(url){
+					$img.attr('src','images/focus-carousel/placeholder.png');
+				});
+				item[index] = 'loaded';
+				loadedItemNum++;
+				if(loadedItemNum == totalItemNum){
+					$elem.trigger('carousel-loadedItems')
+				}
+			})
+		});
+
+		$elem.on('carousel-loadedItems',function(){
+			$elem.off('carousel-show',loadFn)
+		});
+	}
+
 	/*中心轮播图开始*/
 	var $focusCarousel = $('.focus .carousel-container');
 
-	//中心轮播图图片具体的加载
-	$focusCarousel.on('focusCarousel-loadItem',function(ev,index,elem,success){
-		var $imgs = $(elem).find('.carousel-img');
-		loadImages($imgs,function($img,url){
-			$img.attr('src',url);
-			success();
-		},function($img,url){
-			$img.attr('src','images/focus-carousel/placeholder.png');
-		});		
-	});
-	lazyLoad({
-		totalItemNum:$focusCarousel.find('.carousel-img').length,
-		$elem:$focusCarousel,
-		eventName:'carousel-show',
-		eventPrefix:'focusCarousel'		
+	carouselImgLazyLoad($focusCarousel);
+
+	$focusCarousel.on('carousel-loadedItems',function(){
+		$focusCarousel.off('carousel-show',$focusCarousel.loadFn)
 	});
 
 	/*调用轮播图插件*/
@@ -223,22 +207,8 @@
 	/*今日商品开始*/
 	var $todaysCarousel = $('.todays .carousel-container');
 
-	//录播图图片的具体加载
-	$todaysCarousel.on('todaysCarousel-loadItem',function(ev,index,elem,success){
-		var $imgs = $(elem).find('.carousel-img');
-		loadImages($imgs,function($img,url){
-			$img.attr('src',url);
-			success();
-		},function($img,url){
-			$img.attr('src','images/focus-carousel/placeholder.png');
-		});		
-	});
-	lazyLoad({
-		totalItemNum:$todaysCarousel.find('.carousel-img').length,
-		$elem:$todaysCarousel,
-		eventName:'carousel-show',
-		eventPrefix:'todaysCarousel'		
-	});
+	carouselImgLazyLoad($todaysCarousel);
+
 	$todaysCarousel.carousel({
 		activeIndex:0,
 		mode:'slide',
@@ -247,20 +217,93 @@
 
 	/*楼层开始*/
 	var $floors = $('.floor');
+
+	/*
+	$floors.on('tab-show tab-shown tab-hide tab-hidden',function(ev,index,elem){
+		console.log(index,elem,ev.type);
+	});
+	*/
 	//楼层图片图按需加载函数
+	
+	function floorImgLazyLoad($elem){
+
+		var item = {},
+		    totalItemNum =  $elem.find('.floor-img').length,
+			loadedItemNum = 0,
+			loadFn = null;
+		
+		$elem.on('tab-show',loadFn = function(ev,index,elem){
+			console.log('tab-show loading...');
+			if(item[index] != 'loaded'){
+				$elem.trigger('tab-loadItem',[index,elem])
+			}
+		});
+
+		$elem.on('tab-loadItem',function(ev,index,elem){
+			console.log(index,'loading...');
+			var $imgs = $(elem).find('.floor-img');
+			$imgs.each(function(){
+				var $img = $(this);
+				var imgUrl = $img.data('src');
+				loadImage(imgUrl,function(url){
+					setTimeout(function(){
+						$img.attr('src',url);
+					},1000)
+					
+				},function(url){
+					$img.attr('src','images/floor/placeholder.png');
+				});
+				item[index] = 'loaded';
+				loadedItemNum++;
+				if(loadedItemNum == totalItemNum){
+					$elem.trigger('tab-loadedItems')
+				}
+			})
+		});
+
+		$elem.on('tab-loadedItems',function(){
+			$elem.off('tab-show',loadFn)
+		});
+	}
+	/*
+
+	$floors.each(function(){
+		floorImgLazyLoad($(this));
+	});
+
+	//楼层选项卡
+	$floors.tab({
+		css3:false,
+		js:false,
+		mode:'fade',
+		eventName:'mouseenter',
+		activeIndex:0,
+		delay:200,
+		interval:0
+	});
+	*/
 	var $win = $(window);
 	var $doc = $(document);
 	function isVisible($elem){
-		return ($win.height() + $win.scrollTop() > $elem.offset().top) && ($win.scrollTop() < $elem.offset().top+$elem.height());
-	}
-	function timeToShow(){
-		$floors.each(function(index){
-			if(isVisible($(this))){
-				$doc.trigger('floor-show',[index,this]);
-			}
-		})	;	
+		return ($win.height() + $win.scrollTop() > $elem.offset().top) && ($win.scrollTop() < $elem.offset().top+$elem.height())
 	}
 
+	function timeToShow(){
+		console.log('time to show...');
+		$floors.each(function(index){
+			if(isVisible($(this))){
+				// console.log(index+" is show");
+				$doc.trigger('floor-show',[index,this])
+			}
+		})		
+	}
+
+	/*
+	$doc.on('floor-show',function(ev,index,elem){
+		//... HTML
+		console.log(index,elem);
+	})
+	*/
 	//楼层HTML图按需加载函数
 	function buildFloorHtml(oneFloorData){
 		var html = '';
@@ -273,7 +316,7 @@
 	function buildFloorHeadHtml(oneFloorData){
 		var html = '';
 
-		html += '<div class="floor-hd">';
+		html += '<div class="floor-hd">;';
 		html += '	<h2 class="floor-title fl">';
 		html += '		<span class="floor-title-num">'+oneFloorData.num+'F</span>';
 		html += '		<span class="floor-title-text">'+oneFloorData.text+'</span>';
@@ -314,113 +357,65 @@
 		return html;		
 	}
 	
-	//楼层图片的具体加载
-	$floors.on('tab-loadItem',function(ev,index,elem,success){
-		var $imgs = $(elem).find('.floor-img');
-		loadImages($imgs,function($img,url){
-			$img.attr('src',url);
-			success();
-		},function($img,url){
-			$img.attr('src','images/floor/placeholder.png');
+	function floorHtmlLazyLoad(){
+
+		var item = {},
+		    totalItemNum =  $floors.length,
+			loadedItemNum = 0,
+			loadFn = null;
+		
+		$doc.on('floor-show',loadFn = function(ev,index,elem){
+			console.log('floor-show loading...');
+			if(item[index] != 'loaded'){
+				$doc.trigger('floor-loadItem',[index,elem])
+			}
 		});
 
-	});
-	//楼层html的具体加载
-	$doc.on('floor-loadItem',function(ev,index,elem,success){
-		var $elem = $(elem);
-		//请求数据
-		getDataOnce($doc,'data/floor/floorData.json',function(floorData){
-			var html = buildFloorHtml(floorData[index]);
-			//模拟网络延时
-			setTimeout(function(){
-				$elem.html(html);
-				//加载图片
-				lazyLoad({
-					totalItemNum:$elem.find('.floor-img').length,
-					$elem:$elem,
-					eventName:'tab-show',
-					eventPrefix:'tab'		
-				});
-				$elem.tab({
-					css3:false,
-					js:false,
-					mode:'fade',
-					eventName:'mouseenter',
-					activeIndex:0,
-					delay:200,
-					interval:0
-				});					
-			},1000);
+		$doc.on('floor-loadItem',function(ev,index,elem){
+			//HTML 加载
+
+			console.log('will load '+index,elem);
+			//请求数据
+			getDataOnce($doc,'data/floor/floorData.json',function(floorData){
+				var html = buildFloorHtml(floorData[index]);
+				//模拟网络延时
+				setTimeout(function(){
+					$(elem).html(html);
+					//加载图片
+					floorImgLazyLoad($(elem));
+					$(elem).tab({
+						css3:false,
+						js:false,
+						mode:'fade',
+						eventName:'mouseenter',
+						activeIndex:0,
+						delay:200,
+						interval:0
+					});					
+				},1000)
+			});
+			
+			item[index] = 'loaded';
+				loadedItemNum++;
+				if(loadedItemNum == totalItemNum){
+					$doc.trigger('floor-loadedItems')
+				}			
+			});
+
+		$doc.on('floor-loadedItems',function(){
+			$doc.off('floor-show',loadFn)
+			$win.off('scroll resize',$floors.toShowFn);
 		});
-		success();
-	});
-	//移除楼层特殊的事件
-	$doc.on('floor-loadedItems',function(){
-		$win.off('scroll resize',$floors.toShowFn);	
-	});
+	}
 
-	//楼层html的按需加载
-	lazyLoad({
-		totalItemNum:$floors.length,
-		$elem:$doc,
-		eventName:'floor-show',
-		eventPrefix:'floor'	
-	});
-
-	$win.on('scroll resize load',$floors.toShowFn = function(){
+	$win.on('scroll resize',$floors.toShowFn = function(){
 		clearTimeout($floors.floorTimer);
 		$floors.floorTimer = setTimeout(function(){
 			timeToShow();
-		},1000);
+		},200)
 	});
-	function whichFloor(){
-		var num = 0;
-		$floors.each(function(index, elem) {
 
-			num = index;
-			if ($win.scrollTop()+$win.height()/2<$(this).offset().top) {
-
-				num = index -1;
-				return false;
-			}
-		
-		});
-		return num;
-	}
-	var $elevator = $('.elevator');
-	$elevator.items  =$elevator.find('.elevator-item');
-	function setElevator(){
-		var num  = whichFloor();
-		if (num == -1) {
-			$elevator.fadeOut();
-		}else{
-			$elevator.fadeIn();
-			$elevator.items.removeClass('elevator-active');
-			$elevator.items.eq(num).addClass('elevator-active');
-				console.log(num);
-
-		}
-
-	}
-
-	$win.on('scroll resize load',$elevator.toShowFn = function(){
-		clearTimeout($elevator.elevatorTimer);
-		$elevator.elevatorTimer = setTimeout(function(){
-			setElevator();
-		},200);
-	});
-	$elevator.on('click', '.elevator-item', function(event) {
-		var num = $elevator.items.index(this);
-		$('body,html').animate({
-			scrollTop:$floors.eq(num).offset().top
-		});
-	});
+	floorHtmlLazyLoad();
 
 	/*楼层结束*/
-
-	$('#backToTop').on('click',function(){
-		$('body,html').animate({
-			scrollTop:0
-		});
-	});
 })(jQuery);
